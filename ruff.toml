@@ -1,0 +1,31 @@
+# ruff.toml — linter & formatter config for Website Scanner
+# https://docs.astral.sh/ruff/
+
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",   # line too long — handled by formatter
+    "B008",   # do not perform function calls in default arguments
+    "SIM108", # ternary operator — readability preference
+]
+
+[lint.per-file-ignores]
+"tests/**" = [
+    "S101",  # assert statements are fine in tests
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
