@@ -39,7 +39,7 @@ AVAILABLE_SCANS: list[tuple[str, str, str, bool]] = [
         "seo",
         "SEO Scan",
         "Check image ALTs, heading structure, meta descriptions, and more",
-        False,
+        True,
     ),
     (
         "accessibility",
@@ -52,18 +52,30 @@ AVAILABLE_SCANS: list[tuple[str, str, str, bool]] = [
 
 def select_pages(pages: list[str]) -> list[str]:
     """
-    Present an interactive checkbox list and return the selected page URLs.
+    Ask whether to scan all pages or select manually.
 
-    Keyboard shortcuts (provided by InquirerPy):
+    When choosing manually, an interactive checkbox is shown:
       Space   — toggle current item
       a       — select / deselect all
       i       — invert selection
       Enter   — confirm
     """
-    console.print(
-        "\n[bold]Select pages to scan[/bold]  "
-        "[dim]Space=toggle  a=all  i=invert  Enter=confirm[/dim]\n"
-    )
+    console.print(f"\n[bold]Found {len(pages)} page(s)[/bold]\n")
+
+    mode: str = inquirer.select(
+        message="Which pages should be scanned?",
+        choices=[
+            Choice(value="all", name=f"All pages  ({len(pages)} total)"),
+            Choice(value="manual", name="Select manually…"),
+        ],
+        default="all",
+    ).execute()
+
+    if mode == "all":
+        return pages
+
+    # ── Manual selection ──────────────────────────────────────────────────────
+    console.print("\n[dim]Space=toggle  a=select all  A=deselect all  Enter=confirm[/dim]\n")
 
     choices = [Choice(value=page, name=page, enabled=True) for page in pages]
 
@@ -71,6 +83,10 @@ def select_pages(pages: list[str]) -> list[str]:
         message="Pages:",
         choices=choices,
         cycle=True,
+        keybindings={
+            "toggle-all-true": [{"key": "a"}],
+            "toggle-all-false": [{"key": "A"}],
+        },
         transformer=lambda result: f"{len(result)} page(s) selected",
         validate=lambda result: len(result) > 0 or "Select at least one page.",
         invalid_message="Please select at least one page.",
@@ -86,7 +102,7 @@ def select_scans() -> list[str]:
     """
     console.print(
         "\n[bold]Select scans to run[/bold]  "
-        "[dim]Space=toggle  a=all  i=invert  Enter=confirm[/dim]\n"
+        "[dim]Space=toggle  a=select all  A=deselect all  Enter=confirm[/dim]\n"
     )
 
     choices = []
@@ -104,6 +120,10 @@ def select_scans() -> list[str]:
         message="Scans:",
         choices=choices,
         cycle=True,
+        keybindings={
+            "toggle-all-true": [{"key": "a"}],
+            "toggle-all-false": [{"key": "A"}],
+        },
         transformer=lambda result: f"{len(result)} scan(s) selected",
         validate=lambda result: len(result) > 0 or "Select at least one scan.",
         invalid_message="Please select at least one scan.",

@@ -1,6 +1,6 @@
 # Website Scanning Tool
 
-**by [Tuemedia IT](https://tuemedia.de)**
+**by [Tuemedia IT](https://tuemedia-it.de)**
 
 A command-line tool that crawls a website's sitemap, lets you select the pages you want to audit, and runs a suite of automated checks — covering legal compliance, SEO, and accessibility.
 
