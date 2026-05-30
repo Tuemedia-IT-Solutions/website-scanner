@@ -24,6 +24,12 @@ AVAILABLE_SCANS: list[tuple[str, str, str, bool]] = [
         True,
     ),
     (
+        "link_check",
+        "Sitemap Link Check",
+        "Verify every sitemap URL is reachable (detect 404s, 5xx errors, redirects)",
+        True,
+    ),
+    (
         "legal_links",
         "Legal Links Check",
         "Verify imprint & privacy policy are linked on every page",
