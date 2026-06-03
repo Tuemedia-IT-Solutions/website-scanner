@@ -33,7 +33,7 @@ AVAILABLE_SCANS: list[tuple[str, str, str, bool]] = [
         "legal_links",
         "Legal Links Check",
         "Verify imprint & privacy policy are linked on every page",
-        False,
+        True,
     ),
     (
         "tmg_check",
@@ -81,7 +81,9 @@ def select_pages(pages: list[str]) -> list[str]:
         return pages
 
     # ── Manual selection ──────────────────────────────────────────────────────
-    console.print("\n[dim]Space=toggle  a=select all  A=deselect all  Enter=confirm[/dim]\n")
+    console.print(
+        "\n[dim]Space=toggle  a=select all  A=deselect all  Enter=confirm[/dim]\n"
+    )
 
     choices = [Choice(value=page, name=page, enabled=True) for page in pages]
 
