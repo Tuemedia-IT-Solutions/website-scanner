@@ -54,7 +54,7 @@ _FIELD_CHECKS: list[tuple[str, str, re.Pattern, str, str]] = [
         "Street address",
         re.compile(
             r"[A-ZÄÖÜ][a-zäöüß]+"
-            r"(?:straße|strasse|gasse|weg|allee|ring|platz|damm|berg|park|chaussee|steig|pfad)"
+            r"(?:straße|strasse|gasse|weg|allee|ring|platz|damm|berg|park|chaussee|steig|pfad|hof)"
             r"\s+\d+",
             re.IGNORECASE,
         ),
@@ -202,7 +202,9 @@ def _validate(imprint_url: str) -> ImprintResult:
         m = pattern.search(text)
         if m:
             matched = _snippet(text, m, context_right=_FIELD_CONTEXT_RIGHT.get(key, 0))
-            result.issues.append(ImprintIssue("ok", label, f"{label} detected.", matched=matched))
+            result.issues.append(
+                ImprintIssue("ok", label, f"{label} detected.", matched=matched)
+            )
         else:
             result.issues.append(ImprintIssue(severity, label, hint))
 

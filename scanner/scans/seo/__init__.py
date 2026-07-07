@@ -15,6 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from ._types import PageSeoResult, SeoIssue
+from .content import check_content
 from .headings import check_headings
 from .images import check_images
 from .meta import check_meta
@@ -66,6 +67,7 @@ def _scan_page(url: str) -> PageSeoResult:
     result.issues.extend(check_images(soup))
     result.issues.extend(check_headings(soup))
     result.issues.extend(check_meta(soup))
+    result.issues.extend(check_content(soup))
     return result
 
 
@@ -82,9 +84,13 @@ def _render_page(result: PageSeoResult, console: Console) -> None:
         return
 
     status_color = "red" if errors else "yellow" if warnings else "blue"
-    status = f"[{status_color}]{errors} error(s) · {warnings} warning(s)[/{status_color}]"
+    status = (
+        f"[{status_color}]{errors} error(s) · {warnings} warning(s)[/{status_color}]"
+    )
 
-    table = Table(box=box.SIMPLE_HEAD, show_header=True, header_style="bold", padding=(0, 1))
+    table = Table(
+        box=box.SIMPLE_HEAD, show_header=True, header_style="bold", padding=(0, 1)
+    )
     table.add_column("Severity", width=9)
     table.add_column("Check", min_width=24)
     table.add_column("Detail")
@@ -106,8 +112,12 @@ def _render_page(result: PageSeoResult, console: Console) -> None:
 
 
 def _render_summary(results: list[PageSeoResult], console: Console) -> None:
-    total_errors = sum(sum(1 for i in r.issues if i.severity == "error") for r in results)
-    total_warnings = sum(sum(1 for i in r.issues if i.severity == "warning") for r in results)
+    total_errors = sum(
+        sum(1 for i in r.issues if i.severity == "error") for r in results
+    )
+    total_warnings = sum(
+        sum(1 for i in r.issues if i.severity == "warning") for r in results
+    )
     pages_with_issues = sum(1 for r in results if r.issues)
 
     color = "red" if total_errors else "yellow" if total_warnings else "green"

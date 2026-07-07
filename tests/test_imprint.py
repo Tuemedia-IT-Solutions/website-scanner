@@ -58,6 +58,12 @@ _VALID_GMBH_IMPRINT = """
 </body></html>
 """
 
+_VALID_IMPRINT_2 = """
+<html><body>
+<section class="hero" data-v-cb728d0d=""><div class="container" data-v-cb728d0d=""><div class="hero-content" data-v-cb728d0d=""><h1 class="hero-title" data-v-cb728d0d="">Impressum</h1><p class="hero-subtitle" data-v-cb728d0d="">Angaben gemäß § 5 DDG</p></div></div></section><section class="imprint-content" data-v-cb728d0d=""><div class="container" data-v-cb728d0d=""><div class="content-grid" data-v-cb728d0d=""><div class="info-section" data-v-cb728d0d=""><h2 data-v-cb728d0d="">Firmeninformationen</h2><div class="company-card" data-v-cb728d0d=""><h3 data-v-cb728d0d="">Tuemedia IT Solutions</h3><p class="owner" data-v-cb728d0d="">Inhaber: Max Mustermann</p><div class="address" data-v-cb728d0d=""><p data-v-cb728d0d="">Vogelhof 22</p><p data-v-cb728d0d="">45555 Musterort</p><p data-v-cb728d0d="">Deutschland</p></div></div></div><div class="info-section" data-v-cb728d0d=""><h2 data-v-cb728d0d="">Kontakt</h2><div class="contact-card" data-v-cb728d0d=""><div class="contact-item" data-v-cb728d0d=""><div class="contact-icon" data-v-cb728d0d=""><span class="iconify i-mdi:phone" aria-hidden="true" style="" data-v-cb728d0d=""></span></div><div class="contact-details" data-v-cb728d0d=""><span class="contact-label" data-v-cb728d0d="">Telefon:</span><a href="tel:+4911112222333" class="contact-link" data-v-cb728d0d="">+49 1573 3356316</a></div></div><div class="contact-item" data-v-cb728d0d=""><div class="contact-icon" data-v-cb728d0d=""><span class="iconify i-mdi:email" aria-hidden="true" style="" data-v-cb728d0d=""></span></div><div class="contact-details" data-v-cb728d0d=""><span class="contact-label" data-v-cb728d0d="">E-Mail:</span><a href="mailto:info@tuemedia-it.de" class="contact-link" data-v-cb728d0d="">info@tuemedia-it.de</a></div></div><div class="contact-item" data-v-cb728d0d=""><div class="contact-icon" data-v-cb728d0d=""><span class="iconify i-mdi:web" aria-hidden="true" style="" data-v-cb728d0d=""></span></div><div class="contact-details" data-v-cb728d0d=""><span class="contact-label" data-v-cb728d0d="">Website:</span><a href="https://www.tuemedia.de" class="contact-link" data-v-cb728d0d="">www.tuemedia-it.de</a></div></div></div></div><div class="info-section" data-v-cb728d0d=""><h2 data-v-cb728d0d="">Umsatzsteuer-Identifikationsnummer</h2><div class="vat-card" data-v-cb728d0d=""><div class="vat-number" data-v-cb728d0d="">DE352918460</div><p class="vat-description" data-v-cb728d0d="">Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz</p></div></div><div class="info-section" data-v-cb728d0d=""><h2 data-v-cb728d0d="">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2><div class="responsibility-card" data-v-cb728d0d=""><p class="responsible-name" data-v-cb728d0d="">Max Mustermann</p><p class="responsible-address" data-v-cb728d0d="">Vogelhof 22, 45555 Musterort</p></div></div><div class="info-section disclaimer-section" data-v-cb728d0d=""><h2 data-v-cb728d0d="">Haftungsausschluss</h2><div class="disclaimer-item" data-v-cb728d0d=""><h3 data-v-cb728d0d="">Haftung für Inhalte</h3><p data-v-cb728d0d="">Als Diensteanbieter sind wir gemäß § 7 Abs.1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht unter der Verpflichtung, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p></div><div class="disclaimer-item" data-v-cb728d0d=""><h3 data-v-cb728d0d="">Haftung für Links</h3><p data-v-cb728d0d="">Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p></div><div class="disclaimer-item" data-v-cb728d0d=""><h3 data-v-cb728d0d="">Urheberrecht</h3><p data-v-cb728d0d="">Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p></div></div></div></div></section>
+</body></html>
+"""
+
 
 def _mock_response(html: str, status: int = 200) -> MagicMock:
     """Return a mock requests.Response for the given HTML."""
@@ -65,7 +71,9 @@ def _mock_response(html: str, status: int = 200) -> MagicMock:
     mock.status_code = status
     mock.content = html.encode()
     if status >= 400:
-        mock.raise_for_status.side_effect = requests.exceptions.HTTPError(f"HTTP {status}")
+        mock.raise_for_status.side_effect = requests.exceptions.HTTPError(
+            f"HTTP {status}"
+        )
     else:
         mock.raise_for_status = MagicMock()  # no-op
     return mock
@@ -118,12 +126,51 @@ class TestFullyValidImprint:
         assert errors == [], f"Unexpected errors: {errors}"
 
 
+class TestFullyValidImprint2:
+    """Happy-path tests using the real-world Tuemedia IT Solutions imprint."""
+
+    @pytest.fixture(autouse=True)
+    def _patch(self):
+        with patch(
+            "scanner.scans.imprint.requests.get",
+            return_value=_mock_response(_VALID_IMPRINT_2),
+        ):
+            self.result = _validate(_BASE)
+
+    def test_no_fetch_error(self):
+        assert self.result.fetch_error is None
+
+    def test_name_ok(self):
+        assert _issues_by_field(self.result)["Name / company"] == "ok"
+
+    def test_street_ok(self):
+        assert _issues_by_field(self.result)["Street address"] == "ok"
+
+    def test_postal_code_ok(self):
+        assert _issues_by_field(self.result)["Postal code"] == "ok"
+
+    def test_email_ok(self):
+        assert _issues_by_field(self.result)["E-mail address"] == "ok"
+
+    def test_phone_ok(self):
+        assert _issues_by_field(self.result)["Phone number"] == "ok"
+
+    def test_ddg_ok(self):
+        assert _issues_by_field(self.result)["Law reference: DDG"] == "ok"
+
+    def test_no_errors(self):
+        errors = [i for i in self.result.issues if i.severity == "error"]
+        assert errors == [], f"Unexpected errors: {errors}"
+
+
 # ── Missing required fields ───────────────────────────────────────────────────
 
 
 class TestMissingFields:
     def _validate_html(self, html: str) -> ImprintResult:
-        with patch("scanner.scans.imprint.requests.get", return_value=_mock_response(html)):
+        with patch(
+            "scanner.scans.imprint.requests.get", return_value=_mock_response(html)
+        ):
             return _validate(_BASE)
 
     def test_missing_name_is_warning(self):
@@ -166,13 +213,16 @@ class TestMissingFields:
         "Bundesallee 12",
         "Schillerring 7",
         "Elbdamm 99",
+        "Vogelhof 22",
     ],
 )
 def test_street_variants_detected(street: str):
     html = _VALID_IMPRINT.replace("Musterstraße 12", street)
     with patch("scanner.scans.imprint.requests.get", return_value=_mock_response(html)):
         result = _validate(_BASE)
-    assert _issues_by_field(result)["Street address"] == "ok", f"Not detected: {street!r}"
+    assert (
+        _issues_by_field(result)["Street address"] == "ok"
+    ), f"Not detected: {street!r}"
 
 
 # ── Phone number variants ─────────────────────────────────────────────────────
@@ -200,7 +250,9 @@ def test_phone_variants_detected(phone: str):
 
 class TestLawReferences:
     def _validate_html(self, html: str) -> ImprintResult:
-        with patch("scanner.scans.imprint.requests.get", return_value=_mock_response(html)):
+        with patch(
+            "scanner.scans.imprint.requests.get", return_value=_mock_response(html)
+        ):
             return _validate(_BASE)
 
     def test_ddg_detected_as_ok(self):
@@ -239,7 +291,9 @@ class TestLawReferences:
 
 class TestGmbhChecks:
     def _validate_html(self, html: str) -> ImprintResult:
-        with patch("scanner.scans.imprint.requests.get", return_value=_mock_response(html)):
+        with patch(
+            "scanner.scans.imprint.requests.get", return_value=_mock_response(html)
+        ):
             return _validate(_BASE)
 
     def test_gmbh_without_handelsregister_is_error(self):
@@ -313,6 +367,8 @@ class TestMatchedValues:
 
     def test_no_matched_on_missing_field(self):
         html = _VALID_IMPRINT.replace("E-Mail: max@example.com", "")
-        with patch("scanner.scans.imprint.requests.get", return_value=_mock_response(html)):
+        with patch(
+            "scanner.scans.imprint.requests.get", return_value=_mock_response(html)
+        ):
             result = _validate(_BASE)
         assert _matched_by_field(result)["E-mail address"] is None
