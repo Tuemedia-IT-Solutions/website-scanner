@@ -4,8 +4,11 @@ Entry point / main orchestrator.
 """
 
 import argparse
+import json
 import sys
+from datetime import datetime, timezone
 from fnmatch import fnmatch
+from pathlib import Path
 from urllib.parse import urlparse
 
 from rich.console import Console
@@ -18,6 +21,7 @@ from scanner.crawler import (
     normalize_url,
     suggest_sitemap_url,
 )
+from scanner.report import generate as generate_pdf
 from scanner.scans import run_scans
 from scanner.selector import AVAILABLE_SCANS, select_pages, select_scans
 
@@ -89,6 +93,12 @@ def main() -> None:
         dest="exclude",
         help="Exclude pages whose path matches PATTERN (glob, e.g. /blog/*). "
         "Can be repeated.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        metavar="DIR",
+        dest="output_dir",
+        help="Directory to save JSON results. A sub-folder per domain is created automatically.",
     )
     args = parser.parse_args()
 
@@ -204,7 +214,34 @@ def main() -> None:
             scan_config["imprint_url"] = imprint_url
 
     # ── 6. Run scans ──────────────────────────────────────────────────────────
-    run_scans(selected_pages, selected_scans, console, scan_config)
+    scan_results = run_scans(selected_pages, selected_scans, console, scan_config)
+
+    # ── 7. Save JSON results ──────────────────────────────────────────────────
+    if args.output_dir:
+        domain = urlparse(target).netloc or urlparse(target).path
+        domain = domain.replace(":", "_")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+
+        out_dir = Path(args.output_dir) / domain
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_file = out_dir / f"{timestamp}.json"
+
+        payload = {
+            "scan_date": datetime.now(timezone.utc).isoformat(),
+            "target": target,
+            "sitemap": sitemap_url,
+            "pages_scanned": selected_pages,
+            "scans_run": selected_scans,
+            "results": scan_results,
+        }
+
+        out_file.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+        console.print(f"\n[green]✓[/green] Results saved → [cyan]{out_file}[/cyan]")
+
+        pdf_file = out_file.with_suffix(".pdf")
+        with console.status("[dim]Generating PDF report…[/dim]"):
+            generate_pdf(payload, pdf_file)
+        console.print(f"[green]✓[/green] PDF report   → [cyan]{pdf_file}[/cyan]")
 
 
 if __name__ == "__main__":

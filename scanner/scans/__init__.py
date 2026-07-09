@@ -7,6 +7,9 @@ and renders a final results summary.
 
 from __future__ import annotations
 
+import dataclasses
+from typing import Any
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -25,20 +28,33 @@ _REGISTRY = {
 }
 
 
+def _to_json_serializable(obj: Any) -> Any:
+    """Recursively convert dataclasses and lists to JSON-serializable structures."""
+    if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+        return {k: _to_json_serializable(v) for k, v in dataclasses.asdict(obj).items()}
+    if isinstance(obj, list):
+        return [_to_json_serializable(item) for item in obj]
+    return obj
+
+
 def run_scans(
     pages: list[str],
     selected_scan_keys: list[str],
     console: Console,
     scan_config: dict | None = None,
-) -> None:
+) -> dict[str, Any]:
     """
     Run each selected scan against all selected pages.
+
+    Returns a dict mapping each scan key to its structured result,
+    suitable for JSON serialisation.
 
     *scan_config* is an optional dict of per-scan settings, e.g.::
 
         {"imprint_url": "https://example.com/impressum"}
     """
     scan_config = scan_config or {}
+    results: dict[str, Any] = {}
 
     console.print(
         Panel.fit(
@@ -54,9 +70,12 @@ def run_scans(
             console.print(f"[red]Unknown scan key:[/red] {key}")
             continue
         try:
-            module.run(pages, console, scan_config)  # type: ignore[attr-defined]
+            raw = module.run(pages, console, scan_config)  # type: ignore[attr-defined]
+            results[key] = _to_json_serializable(raw)
         except NotImplementedError:
             _print_not_implemented(key, console)
+
+    return results
 
 
 def _print_not_implemented(key: str, console: Console) -> None:
