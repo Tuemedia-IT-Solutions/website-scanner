@@ -170,7 +170,7 @@ def run(pages: list[str], console: Console, config: dict) -> ImprintResult:
     )
 
     with console.status("[dim]Fetching imprint page…[/dim]"):
-        result = _validate(imprint_url)
+        result = _validate(imprint_url, config.get("page_cache"))
 
     _render(result, console)
     return result
@@ -179,11 +179,15 @@ def run(pages: list[str], console: Console, config: dict) -> ImprintResult:
 # ── Internals ─────────────────────────────────────────────────────────────────
 
 
-def _validate(imprint_url: str) -> ImprintResult:
+def _validate(imprint_url: str, cache=None) -> ImprintResult:
     result = ImprintResult(imprint_url=imprint_url)
 
     try:
-        resp = requests.get(imprint_url, timeout=_TIMEOUT, headers=_HEADERS)
+        resp = (
+            cache.get(imprint_url)
+            if cache is not None
+            else requests.get(imprint_url, timeout=_TIMEOUT, headers=_HEADERS)
+        )
         resp.raise_for_status()
     except requests.RequestException as exc:
         result.fetch_error = str(exc)

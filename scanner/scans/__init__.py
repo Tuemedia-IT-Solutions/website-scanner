@@ -14,6 +14,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from scanner.fetch import PageCache
+
 from . import accessibility, imprint, legal, link_check, seo, tmg_check
 
 # Maps scan keys (from selector.py) to their module.
@@ -54,6 +56,7 @@ def run_scans(
         {"imprint_url": "https://example.com/impressum"}
     """
     scan_config = scan_config or {}
+    scan_config.setdefault("page_cache", PageCache())
     results: dict[str, Any] = {}
 
     console.print(

@@ -83,11 +83,12 @@ class LegalLinksResult:
 
 def run(pages: list[str], console: Console, config: dict) -> list[LegalLinksResult]:
     """Scan each page for imprint and privacy policy links."""
+    cache = config.get("page_cache")
     results: list[LegalLinksResult] = []
 
     for url in pages:
         with console.status(f"[dim]Checking legal links: {url}…[/dim]"):
-            results.append(_check_page(url))
+            results.append(_check_page(url, cache))
 
     _render(results, console)
     return results
@@ -96,12 +97,16 @@ def run(pages: list[str], console: Console, config: dict) -> list[LegalLinksResu
 # ── Internals ─────────────────────────────────────────────────────────────────
 
 
-def _check_page(url: str) -> LegalLinksResult:
+def _check_page(url: str, cache=None) -> LegalLinksResult:
     result = LegalLinksResult(url=url)
 
     try:
-        resp = requests.get(
-            url, timeout=_TIMEOUT, headers=_HEADERS, allow_redirects=True
+        resp = (
+            cache.get(url)
+            if cache is not None
+            else requests.get(
+                url, timeout=_TIMEOUT, headers=_HEADERS, allow_redirects=True
+            )
         )
         resp.raise_for_status()
     except requests.exceptions.Timeout:

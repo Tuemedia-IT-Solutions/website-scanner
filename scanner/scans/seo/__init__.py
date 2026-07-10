@@ -38,11 +38,12 @@ _ORDER = {"error": 0, "warning": 1, "info": 2}
 
 def run(pages: list[str], console: Console, config: dict) -> list[PageSeoResult]:
     """Run all SEO checks on every selected page."""
+    cache = config.get("page_cache")
     results: list[PageSeoResult] = []
 
     for url in pages:
         with console.status(f"[dim]SEO scan: {url}…[/dim]"):
-            result = _scan_page(url)
+            result = _scan_page(url, cache)
         results.append(result)
         _render_page(result, console)
 
@@ -53,11 +54,15 @@ def run(pages: list[str], console: Console, config: dict) -> list[PageSeoResult]
 # ── Internals ─────────────────────────────────────────────────────────────────
 
 
-def _scan_page(url: str) -> PageSeoResult:
+def _scan_page(url: str, cache=None) -> PageSeoResult:
     result = PageSeoResult(url=url)
 
     try:
-        resp = requests.get(url, timeout=_TIMEOUT, headers=_HEADERS)
+        resp = (
+            cache.get(url)
+            if cache is not None
+            else requests.get(url, timeout=_TIMEOUT, headers=_HEADERS)
+        )
         resp.raise_for_status()
     except requests.RequestException as exc:
         result.fetch_error = str(exc)

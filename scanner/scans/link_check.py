@@ -66,11 +66,12 @@ class LinkResult:
 
 def run(pages: list[str], console: Console, config: dict) -> list[LinkResult]:
     """Check HTTP reachability of every page."""
+    cache = config.get("page_cache")
     results: list[LinkResult] = []
 
     for url in pages:
         with console.status(f"[dim]Checking: {url}…[/dim]"):
-            results.append(_check_url(url))
+            results.append(_check_url(url, cache))
 
     _render(results, console)
     return results
@@ -79,15 +80,19 @@ def run(pages: list[str], console: Console, config: dict) -> list[LinkResult]:
 # ── Internals ─────────────────────────────────────────────────────────────────
 
 
-def _check_url(url: str) -> LinkResult:
+def _check_url(url: str, cache=None) -> LinkResult:
     result = LinkResult(url=url)
 
     try:
-        resp = requests.get(
-            url,
-            timeout=_TIMEOUT,
-            headers=_HEADERS,
-            allow_redirects=True,
+        resp = (
+            cache.get(url)
+            if cache is not None
+            else requests.get(
+                url,
+                timeout=_TIMEOUT,
+                headers=_HEADERS,
+                allow_redirects=True,
+            )
         )
         result.status = resp.status_code
 
@@ -110,7 +115,9 @@ def _render(results: list[LinkResult], console: Console) -> None:
     redirects = sum(1 for r in results if r.severity == "redirect")
     ok_count = sum(1 for r in results if r.severity == "ok")
 
-    table = Table(box=box.SIMPLE_HEAD, show_header=True, header_style="bold", padding=(0, 1))
+    table = Table(
+        box=box.SIMPLE_HEAD, show_header=True, header_style="bold", padding=(0, 1)
+    )
     table.add_column("Status", width=7, justify="right")
     table.add_column("Result", width=10)
     table.add_column("URL")
