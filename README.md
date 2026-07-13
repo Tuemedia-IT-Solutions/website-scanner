@@ -198,9 +198,9 @@ Checks each page for common on-page SEO issues:
 | Multiple `<h1>` elements                  | Warning  |
 | Skipped heading levels (e.g. h1 → h3)     | Warning  |
 | Missing `<meta name="description">`       | Warning  |
-| Description outside 50–160 characters     | Warning  |
+| Description outside 50-160 characters     | Warning  |
 | Missing or empty `<title>`                | Error    |
-| Title outside 10–60 characters            | Warning  |
+| Title outside 10-60 characters            | Warning  |
 | Missing `<link rel="canonical">`          | Info     |
 
 **Output:** per-page table — check · severity · finding detail

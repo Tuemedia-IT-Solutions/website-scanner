@@ -26,7 +26,7 @@ class SeoScore:
     positives: int  # number of checks that passed
     warnings: int  # number of checks with warnings
     errors: int  # number of checks with errors
-    score: int  # composite 0–100 score
+    score: int  # composite 0-100 score
 
 
 @dataclass
