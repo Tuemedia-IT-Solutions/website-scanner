@@ -120,6 +120,7 @@ class _ScanPDF(FPDF):
         self.ln(2)
 
     def kv_line(self, key: str, value: str, key_w: float = 38) -> None:
+        self.set_x(self.l_margin)
         self.set_font(_FONT_NAME, "B", 9)
         self.cell(key_w, 5.5, key)
         self.set_font(_FONT_NAME, "", 9)
@@ -296,6 +297,59 @@ def _cover(pdf: _ScanPDF, payload: dict) -> None:
     pdf.ln()
     pdf.ln(4)
 
+    # ── SEO Score overview ────────────────────────────────────────────────────
+    if seo_pgs:
+        scored_pgs = [p for p in seo_pgs if p.get("score") is not None]
+        if scored_pgs:
+            overall_score = int(
+                sum(p["score"]["score"] for p in scored_pgs) / len(scored_pgs)
+            )
+            total_positives = sum(p["score"]["positives"] for p in scored_pgs)
+            total_warns = sum(p["score"]["warnings"] for p in scored_pgs)
+            total_errs = sum(p["score"]["errors"] for p in scored_pgs)
+
+            score_colour = (
+                _RED
+                if overall_score < 50
+                else _ORANGE if overall_score < 80 else _GREEN
+            )
+
+            pdf.ln(2)
+            pdf.set_draw_color(*_BORDER)
+            pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+            pdf.ln(4)
+
+            pdf.set_font(_FONT_NAME, "B", 9)
+            pdf.set_text_color(*_MEDIUM)
+            pdf.cell(pdf._pw, 5, "SEO Score", **_NL)
+            pdf.set_text_color(*_BLACK)
+            pdf.ln(2)
+
+            # Big score badge
+            pdf.set_fill_color(*score_colour)
+            pdf.set_text_color(*_WHITE)
+            pdf.set_font(_FONT_NAME, "B", 28)
+            pdf.cell(28, 16, str(overall_score), fill=True, align="C")
+            pdf.set_font(_FONT_NAME, "", 7.5)
+            pdf.cell(8, 16, "/100", align="L")
+
+            # Counts next to badge
+            pdf.set_text_color(*_GREEN)
+            pdf.set_font(_FONT_NAME, "B", 8.5)
+            pdf.cell(30, 8, f"  \u2713 {total_positives} passed", align="L")
+            pdf.set_text_color(*_BLACK)
+            x_after = pdf.get_x()
+            y_after = pdf.get_y()
+            pdf.set_xy(x_after, y_after + 8)
+            pdf.set_x(28 + 8 + pdf.l_margin)
+            pdf.set_text_color(*_ORANGE)
+            pdf.cell(30, 8, f"  \u26a0 {total_warns} warnings", align="L")
+            pdf.set_text_color(*_RED)
+            pdf.cell(30, 8, f"  \u2717 {total_errs} errors", align="L")
+            pdf.set_text_color(*_BLACK)
+            pdf.ln(10)
+            pdf.ln(2)
+
     # ── Scanned pages list ────────────────────────────────────────────────────
     pdf.set_draw_color(*_BORDER)
     pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
@@ -306,6 +360,13 @@ def _cover(pdf: _ScanPDF, payload: dict) -> None:
     pdf.set_text_color(*_BLACK)
     pdf.ln(1)
 
+    # Build URL → SEO score lookup
+    seo_score_map: dict[str, dict] = {}
+    for p in seo_pgs:
+        score_data = p.get("score")
+        if score_data:
+            seo_score_map[p.get("url", "")] = score_data
+
     for idx, url in enumerate(pages):
         fill = _LIGHT if idx % 2 else _WHITE
         pdf.set_fill_color(*fill)
@@ -313,7 +374,20 @@ def _cover(pdf: _ScanPDF, payload: dict) -> None:
         pdf.set_text_color(*_MEDIUM)
         pdf.cell(8, 5, str(idx + 1), fill=True)
         pdf.set_text_color(*_BLACK)
-        pdf.cell(pdf._pw - 8, 5, url, fill=True, **_NL)
+
+        score_data = seo_score_map.get(url)
+        if score_data:
+            pg_score = score_data["score"]
+            sc_colour = _RED if pg_score < 50 else _ORANGE if pg_score < 80 else _GREEN
+            url_w = pdf._pw - 8 - 22
+            pdf.cell(url_w, 5, url, fill=True)
+            pdf.set_fill_color(*sc_colour)
+            pdf.set_text_color(*_WHITE)
+            pdf.set_font(_FONT_NAME, "B", 7)
+            pdf.cell(22, 5, f" SEO {pg_score}/100", fill=True, align="L", **_NL)
+            pdf.set_text_color(*_BLACK)
+        else:
+            pdf.cell(pdf._pw - 8, 5, url, fill=True, **_NL)
 
 
 # ── Imprint section ───────────────────────────────────────────────────────────
@@ -461,6 +535,70 @@ def _legal_section(pdf: _ScanPDF, results: list) -> None:
         pdf.ln()
 
 
+# ── Performance section ───────────────────────────────────────────────────────
+
+
+def _performance_section(pdf: _ScanPDF, results: list) -> None:
+    pdf.section_title("Performance")
+
+    timed = [r for r in results if r.get("response_time_ms") is not None]
+    errors = [r for r in results if r.get("error")]
+    slow = [r for r in timed if r["response_time_ms"] >= 500]
+    avg_ms = sum(r["response_time_ms"] for r in timed) / len(timed) if timed else 0
+
+    colour = _RED if len(slow) > len(results) // 2 else _ORANGE if slow else _GREEN
+    pdf.summary_line(
+        f"avg {avg_ms:.0f} ms   {len(slow)} slow (≥500 ms)   {len(errors)} error(s)"
+        f"   across {len(results)} page(s)",
+        colour,
+    )
+
+    w_url = pdf._pw - 28 - 26 - 20
+    widths = [w_url, 28, 26, 20]
+    pdf.table_header(["URL", "Time (ms)", "Size (KB)", "Rating"], widths)
+
+    for idx, r in enumerate(results):
+        url = r.get("url", "").replace("https://", "").replace("http://", "")
+        if len(url) > 52:
+            url = "..." + url[-49:]
+        ms = r.get("response_time_ms")
+        size_kb = (
+            f"{r['content_size_bytes'] / 1024:.1f}"
+            if r.get("content_size_bytes") is not None
+            else "—"
+        )
+        err = r.get("error")
+
+        if ms is not None:
+            if ms < 500:
+                rating_colour, rating_label = _GREEN, "FAST"
+            elif ms < 2_000:
+                rating_colour, rating_label = _ORANGE, "SLOW"
+            else:
+                rating_colour, rating_label = _RED, "VERY SLOW"
+            time_str = f"{ms:.0f}"
+        else:
+            rating_colour, rating_label = _RED, "ERROR"
+            time_str = "—"
+
+        fill = _LIGHT if idx % 2 else _WHITE
+        pdf.plain_cell(url, widths[0], fill_colour=fill)
+        pdf.plain_cell(time_str, widths[1], fill_colour=fill, align="R")
+        pdf.plain_cell(size_kb, widths[2], fill_colour=fill, align="R")
+        pdf.set_fill_color(*rating_colour)
+        pdf.set_text_color(*_WHITE)
+        pdf.set_font(_FONT_NAME, "B", 7.5)
+        pdf.cell(widths[3], 6, rating_label, fill=True, border=1, align="C", **_NL)
+        pdf.set_text_color(*_BLACK)
+
+        if err:
+            pdf.set_x(pdf.l_margin + widths[0])
+            pdf.set_font(_FONT_NAME, "I", 7.5)
+            pdf.set_text_color(*_RED)
+            pdf.multi_cell(widths[1] + widths[2] + widths[3], 4.5, err[:80])
+            pdf.set_text_color(*_BLACK)
+
+
 # ── SEO section ───────────────────────────────────────────────────────────────
 
 
@@ -507,6 +645,26 @@ def _seo_section(pdf: _ScanPDF, pages: list) -> None:
         pdf.set_font(_FONT_NAME, "B", 8.5)
         pdf.cell(pdf._pw, 6, f"  {url}", fill=True, **_NL)
         pdf.set_text_color(*_BLACK)
+
+        # Meta title + description
+        page_title = page.get("page_title")
+        meta_desc = page.get("meta_description")
+        if page_title or meta_desc:
+            pdf.set_x(pdf.l_margin + 4)
+            pdf.set_font(_FONT_NAME, "B", 7.5)
+            pdf.set_text_color(*_MEDIUM)
+            pdf.cell(18, 4.5, "Title:")
+            pdf.set_font(_FONT_NAME, "", 7.5)
+            pdf.set_text_color(*_BLACK)
+            pdf.multi_cell(pdf._pw - 22, 4.5, page_title or "—")
+            pdf.set_x(pdf.l_margin + 4)
+            pdf.set_font(_FONT_NAME, "B", 7.5)
+            pdf.set_text_color(*_MEDIUM)
+            pdf.cell(18, 4.5, "Descr.:")
+            pdf.set_font(_FONT_NAME, "", 7.5)
+            pdf.set_text_color(*_BLACK)
+            pdf.multi_cell(pdf._pw - 22, 4.5, meta_desc or "—")
+            pdf.ln(1)
 
         if fetch_error:
             pdf.set_x(pdf.l_margin + 4)
@@ -558,6 +716,10 @@ def generate(payload: dict[str, Any], out_path: Path) -> None:
 
     if "link_check" in results:
         _link_section(pdf, results["link_check"])
+
+    if "performance" in results:
+        pdf.add_page()
+        _performance_section(pdf, results["performance"])
 
     if "legal_links" in results:
         pdf.add_page()

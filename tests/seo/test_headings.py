@@ -32,7 +32,7 @@ def test_only_h2_reports_missing_h1():
 
 def test_single_h1_no_issues():
     issues = check_headings(_soup("<h1>Page Title</h1>"))
-    assert issues == []
+    assert not any(i.severity in ("error", "warning") for i in issues)
 
 
 # ── Multiple H1 ───────────────────────────────────────────────────────────────

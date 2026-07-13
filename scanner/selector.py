@@ -48,6 +48,12 @@ AVAILABLE_SCANS: list[tuple[str, str, str, bool]] = [
         True,
     ),
     (
+        "performance",
+        "Performance Scan",
+        "Measure HTTP response time and content size for each page",
+        True,
+    ),
+    (
         "accessibility",
         "Accessibility Scan",
         "Detect <div>-buttons, missing form labels, and other ARIA issues",

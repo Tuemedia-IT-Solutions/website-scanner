@@ -37,7 +37,7 @@ def test_100_words_is_ok():
 
 def test_200_words_is_ok():
     issues = check_content(_soup(f"<body><p>{_words(200)}</p></body>"))
-    assert issues == []
+    assert not any(i.severity in ("error", "warning") for i in issues)
 
 
 def test_script_content_excluded():

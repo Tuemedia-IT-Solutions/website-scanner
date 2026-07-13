@@ -30,7 +30,13 @@ def check_content(soup: BeautifulSoup) -> list[SeoIssue]:
                 ),
             )
         ]
-    return []
+    return [
+        SeoIssue(
+            check="Content length",
+            severity="ok",
+            detail=f"Page body contains ~{word_count} words.",
+        )
+    ]
 
 
 def _body_word_count(soup: BeautifulSoup) -> int:

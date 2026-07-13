@@ -16,7 +16,7 @@ from rich.table import Table
 
 from scanner.fetch import PageCache
 
-from . import accessibility, imprint, legal, link_check, seo, tmg_check
+from . import accessibility, imprint, legal, link_check, performance, seo, tmg_check
 
 # Maps scan keys (from selector.py) to their module.
 # Each module must expose: run(pages, console, config) -> Any
@@ -26,6 +26,7 @@ _REGISTRY = {
     "legal_links": legal,
     "tmg_check": tmg_check,
     "seo": seo,
+    "performance": performance,
     "accessibility": accessibility,
 }
 

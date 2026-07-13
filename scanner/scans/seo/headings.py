@@ -40,6 +40,7 @@ def check_headings(soup: BeautifulSoup) -> list[SeoIssue]:
                 check="Missing H1",
                 severity="error",
                 detail="No <h1> found. Every page should have exactly one H1 as its main heading.",
+                weight=1.5,
             )
         )
     elif len(h1s) > 1:
@@ -84,6 +85,15 @@ def check_headings(soup: BeautifulSoup) -> list[SeoIssue]:
                     ),
                 )
             )
+
+    if not issues:
+        issues.append(
+            SeoIssue(
+                check="Heading structure",
+                severity="ok",
+                detail="Heading structure is well-formed (single H1, no skipped levels).",
+            )
+        )
 
     return issues
 
