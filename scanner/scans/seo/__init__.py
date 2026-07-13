@@ -1,7 +1,7 @@
 """
 scanner/scans/seo/__init__.py
 
-SEO Scan — entry point.
+SEO Scan - entry point.
 Fetches each selected page, runs all check modules, and renders results.
 """
 
@@ -100,7 +100,7 @@ def _compute_score(issues: list[SeoIssue]) -> SeoScore:
 
 def _render_page(result: PageSeoResult, console: Console) -> None:
     if result.fetch_error:
-        console.print(f"[red]✗[/red] [bold]{result.url}[/bold] — {result.fetch_error}")
+        console.print(f"[red]✗[/red] [bold]{result.url}[/bold] - {result.fetch_error}")
         return
 
     visible_issues = [i for i in result.issues if i.severity != "ok"]

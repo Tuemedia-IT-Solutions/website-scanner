@@ -223,9 +223,9 @@ def _cover(pdf: _ScanPDF, payload: dict) -> None:
     pdf.ln(6)
 
     # ── Metadata ──────────────────────────────────────────────────────────────
-    pdf.kv_line("Target:", payload.get("target", "—"))
-    pdf.kv_line("Scan date:", payload.get("scan_date", "—")[:19].replace("T", "  "))
-    pdf.kv_line("Sitemap:", payload.get("sitemap", "—"))
+    pdf.kv_line("Target:", payload.get("target", "-"))
+    pdf.kv_line("Scan date:", payload.get("scan_date", "-")[:19].replace("T", "  "))
+    pdf.kv_line("Sitemap:", payload.get("sitemap", "-"))
     pdf.kv_line("Pages scanned:", str(len(pages)))
     pdf.kv_line("Scans run:", ", ".join(scans))
     pdf.ln(4)
@@ -396,7 +396,7 @@ def _cover(pdf: _ScanPDF, payload: dict) -> None:
 def _imprint_section(pdf: _ScanPDF, result: dict) -> None:
     pdf.section_title("Imprint Check")
 
-    url = result.get("imprint_url", "—")
+    url = result.get("imprint_url", "-")
     pdf.set_font(_FONT_NAME, "", 8.5)
     pdf.set_text_color(*_MEDIUM)
     pdf.cell(pdf._pw, 5, url, **_NL)
@@ -441,7 +441,7 @@ def _link_section(pdf: _ScanPDF, results: list) -> None:
     pdf.table_header(["Status", "Result", "URL"], widths)
 
     for idx, r in enumerate(results):
-        status = str(r.get("status") or "—")
+        status = str(r.get("status") or "-")
         url = r.get("url", "")
         error = r.get("error") or ""
 
@@ -565,7 +565,7 @@ def _performance_section(pdf: _ScanPDF, results: list) -> None:
         size_kb = (
             f"{r['content_size_bytes'] / 1024:.1f}"
             if r.get("content_size_bytes") is not None
-            else "—"
+            else "-"
         )
         err = r.get("error")
 
@@ -579,7 +579,7 @@ def _performance_section(pdf: _ScanPDF, results: list) -> None:
             time_str = f"{ms:.0f}"
         else:
             rating_colour, rating_label = _RED, "ERROR"
-            time_str = "—"
+            time_str = "-"
 
         fill = _LIGHT if idx % 2 else _WHITE
         pdf.plain_cell(url, widths[0], fill_colour=fill)
@@ -656,14 +656,14 @@ def _seo_section(pdf: _ScanPDF, pages: list) -> None:
             pdf.cell(18, 4.5, "Title:")
             pdf.set_font(_FONT_NAME, "", 7.5)
             pdf.set_text_color(*_BLACK)
-            pdf.multi_cell(pdf._pw - 22, 4.5, page_title or "—")
+            pdf.multi_cell(pdf._pw - 22, 4.5, page_title or "-")
             pdf.set_x(pdf.l_margin + 4)
             pdf.set_font(_FONT_NAME, "B", 7.5)
             pdf.set_text_color(*_MEDIUM)
             pdf.cell(18, 4.5, "Descr.:")
             pdf.set_font(_FONT_NAME, "", 7.5)
             pdf.set_text_color(*_BLACK)
-            pdf.multi_cell(pdf._pw - 22, 4.5, meta_desc or "—")
+            pdf.multi_cell(pdf._pw - 22, 4.5, meta_desc or "-")
             pdf.ln(1)
 
         if fetch_error:
@@ -697,11 +697,11 @@ def generate(payload: dict[str, Any], out_path: Path) -> None:
     """
     Generate a PDF report from a scan payload dict and write it to *out_path*.
 
-    *payload* is the same dict that gets saved as JSON — keys:
+    *payload* is the same dict that gets saved as JSON - keys:
         target, scan_date, sitemap, pages_scanned, scans_run, results
     """
-    target = payload.get("target", "—")
-    scan_date = payload.get("scan_date", "—")
+    target = payload.get("target", "-")
+    scan_date = payload.get("scan_date", "-")
 
     pdf = _ScanPDF(target, scan_date)
 

@@ -1,7 +1,7 @@
 """
 scanner/scans/__init__.py
 
-Scan orchestrator — dispatches selected scans to their modules
+Scan orchestrator - dispatches selected scans to their modules
 and renders a final results summary.
 """
 
@@ -87,6 +87,6 @@ def _print_not_implemented(key: str, console: Console) -> None:
     table.add_column(style="yellow")
     table.add_column()
     table.add_row("Scan:", key)
-    table.add_row("Status:", "[yellow]Not yet implemented — coming soon[/yellow]")
+    table.add_row("Status:", "[yellow]Not yet implemented - coming soon[/yellow]")
     console.print(table)
     console.print()

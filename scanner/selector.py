@@ -2,8 +2,8 @@
 scanner/selector.py
 
 Interactive selection helpers:
-  - select_pages()  — checkbox list of pages to scan
-  - select_scans()  — checkbox list of scans to run
+  - select_pages()  - checkbox list of pages to scan
+  - select_scans()  - checkbox list of scans to run
 """
 
 from __future__ import annotations
@@ -67,10 +67,10 @@ def select_pages(pages: list[str]) -> list[str]:
     Ask whether to scan all pages or select manually.
 
     When choosing manually, an interactive checkbox is shown:
-      Space   — toggle current item
-      a       — select / deselect all
-      i       — invert selection
-      Enter   — confirm
+      Space   - toggle current item
+      a       - select / deselect all
+      i       - invert selection
+      Enter   - confirm
     """
     console.print(f"\n[bold]Found {len(pages)} page(s)[/bold]\n")
 
@@ -125,7 +125,7 @@ def select_scans() -> list[str]:
         choices.append(
             Choice(
                 value=key,
-                name=f"{label}{status} — {description}",
+                name=f"{label}{status} - {description}",
                 enabled=True,
             )
         )

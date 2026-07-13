@@ -187,16 +187,16 @@ def _render(results: list[LegalLinksResult], console: Console) -> None:
         if r.errors:
             table.add_row(
                 r.url,
-                "[dim]—[/dim]",
-                "[dim]—[/dim]",
-                "[dim]—[/dim]",
+                "[dim]-[/dim]",
+                "[dim]-[/dim]",
+                "[dim]-[/dim]",
                 f"[red]{notes}[/red]",
             )
         else:
             agb_cell = (
                 _link_cell(r.has_agb_link, r.agb_href)
                 if r.has_agb_link
-                else "[dim]—[/dim]"
+                else "[dim]-[/dim]"
             )
             table.add_row(
                 r.url,

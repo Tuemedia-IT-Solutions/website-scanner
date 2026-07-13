@@ -69,7 +69,7 @@ def test_long_title_is_warning():
 
 
 def test_valid_title_no_issue():
-    title = "Awesome Website — Products & Services"
+    title = "Awesome Website - Products & Services"
     issues = check_meta(_soup(f"<html><head><title>{title}</title></head></html>"))
     assert not any(
         i.check.startswith("Title") and i.severity in ("error", "warning")

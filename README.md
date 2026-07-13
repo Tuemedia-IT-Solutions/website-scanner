@@ -2,7 +2,7 @@
 
 **by [Tuemedia IT](https://tuemedia-it.de)**
 
-A command-line tool that crawls a website's sitemap, lets you select the pages you want to audit, and runs a suite of automated checks — covering legal compliance, SEO, and accessibility.
+A command-line tool that crawls a website's sitemap, lets you select the pages you want to audit, and runs a suite of automated checks - covering legal compliance, SEO, and accessibility.
 
 ---
 
@@ -29,14 +29,14 @@ A command-line tool that crawls a website's sitemap, lets you select the pages y
 
 | Feature                           | Description                                                                                              |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **URL normalisation**             | Enter a bare domain (`example.com`) or a full URL — the tool handles both.                               |
+| **URL normalisation**             | Enter a bare domain (`example.com`) or a full URL - the tool handles both.                               |
 | **Sitemap discovery**             | Checks `robots.txt` for a `Sitemap:` directive, falls back to `<domain>/sitemap.xml`.                    |
 | **Sitemap suggestion & override** | The detected sitemap URL is shown as a pre-filled prompt; press Enter to accept or type a different URL. |
 | **Sitemap index support**         | Follows `<sitemapindex>` files recursively to collect every child sitemap.                               |
-| **Interactive page selection**    | Checkbox list with keyboard shortcuts — toggle individual pages, select all, invert, then confirm.       |
+| **Interactive page selection**    | Checkbox list with keyboard shortcuts - toggle individual pages, select all, invert, then confirm.       |
 | **Interactive scan selection**    | Choose which scan modules to run before the scan starts.                                                 |
 
-### Planned — see [Scan Modules](#scan-modules)
+### Planned - see [Scan Modules](#scan-modules)
 
 - Legal Links Check
 - TMG / DDG Check
@@ -83,7 +83,7 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-# Interactive mode — prompts for URL and sitemap
+# Interactive mode - prompts for URL and sitemap
 python main.py
 
 # Pass the domain directly
@@ -155,12 +155,12 @@ website-scanner/
 
 Verifies that every page on the site contains visible links to:
 
-- The **imprint** (German: _Impressum_) — required by German law (§ 5 DDG) for commercial websites.
-- The **privacy policy** (German: _Datenschutzerklärung_) — required by GDPR Art. 13/14.
+- The **imprint** (German: _Impressum_) - required by German law (§ 5 DDG) for commercial websites.
+- The **privacy policy** (German: _Datenschutzerklärung_) - required by GDPR Art. 13/14.
 
 Detection uses a combination of URL path heuristics (e.g. `/impressum`, `/datenschutz`) and link-text matching. Pages where one or both links are missing are flagged.
 
-**Output:** per-page table — URL · Imprint linked · Privacy linked · Notes
+**Output:** per-page table - URL · Imprint linked · Privacy linked · Notes
 
 ---
 
@@ -170,8 +170,8 @@ Detection uses a combination of URL path heuristics (e.g. `/impressum`, `/datens
 
 The _Telemediengesetz_ (TMG) was the German law governing online services until it was superseded:
 
-- **2021** — TTDSG (_Telekommunikation-Telemedien-Datenschutz-Gesetz_) replaced the data-protection provisions of TMG.
-- **2024** — DDG (_Digitale-Dienste-Gesetz_, implementing the EU Digital Services Act) replaced the remaining TMG provisions.
+- **2021** - TTDSG (_Telekommunikation-Telemedien-Datenschutz-Gesetz_) replaced the data-protection provisions of TMG.
+- **2024** - DDG (_Digitale-Dienste-Gesetz_, implementing the EU Digital Services Act) replaced the remaining TMG provisions.
 
 Imprint pages that still cite TMG as the legal basis are outdated. This scan:
 
@@ -203,7 +203,7 @@ Checks each page for common on-page SEO issues:
 | Title outside 10-60 characters            | Warning  |
 | Missing `<link rel="canonical">`          | Info     |
 
-**Output:** per-page table — check · severity · finding detail
+**Output:** per-page table - check · severity · finding detail
 
 ---
 
@@ -225,7 +225,7 @@ Checks each page for WCAG 2.1 AA violations:
 
 > Colour-contrast checking requires CSS rendering and is planned for a later phase.
 
-**Output:** per-page table — WCAG criterion · severity · offending element · detail
+**Output:** per-page table - WCAG criterion · severity · offending element · detail
 
 ---
 

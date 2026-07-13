@@ -1,4 +1,4 @@
-# ruff.toml — linter & formatter config for Website Scanner
+# ruff.toml - linter & formatter config for Website Scanner
 # https://docs.astral.sh/ruff/
 
 target-version = "py311"
@@ -16,9 +16,9 @@ select = [
     "SIM", # flake8-simplify
 ]
 ignore = [
-    "E501",   # line too long — handled by formatter
+    "E501",   # line too long - handled by formatter
     "B008",   # do not perform function calls in default arguments
-    "SIM108", # ternary operator — readability preference
+    "SIM108", # ternary operator - readability preference
 ]
 
 [lint.per-file-ignores]

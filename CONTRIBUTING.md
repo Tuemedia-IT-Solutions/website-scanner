@@ -25,7 +25,7 @@ pip install -r requirements.txt
 python -m pytest tests/ -v
 ```
 
-All new code must be covered by tests. Tests live in `tests/` and mirror the module structure under `scanner/`. Use `unittest.mock.patch` to avoid real network calls — see `tests/test_imprint.py` as a reference.
+All new code must be covered by tests. Tests live in `tests/` and mirror the module structure under `scanner/`. Use `unittest.mock.patch` to avoid real network calls - see `tests/test_imprint.py` as a reference.
 
 ## Linting & formatting
 
@@ -64,7 +64,7 @@ All jobs must be green before a PR can be merged.
 
 ## Pull request guidelines
 
-- Keep PRs focused — one feature or fix per PR.
+- Keep PRs focused - one feature or fix per PR.
 - Write a clear description of what changed and why.
 - Ensure `pytest` and `ruff` pass locally before opening a PR.
 - Reference any relevant issue numbers.

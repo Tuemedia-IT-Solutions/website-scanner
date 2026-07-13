@@ -1,7 +1,7 @@
 """
 scanner/scans/accessibility.py
 ===============================
-Accessibility Scan — TO BE DEVELOPED
+Accessibility Scan - TO BE DEVELOPED
 
 Planned checks
 --------------
@@ -27,7 +27,7 @@ For each selected page:
    - aria-required / aria-invalid used without corresponding role → warning
 
 5. **Colour contrast (future)**
-   - Requires rendered CSS — placeholder for Phase 2.
+   - Requires rendered CSS - placeholder for Phase 2.
 
 6. **Language attribute**
    - <html> without lang attribute → error

@@ -1,7 +1,7 @@
 """
 scanner/scans/tmg_check.py
 ==========================
-Imprint TMG / DDG Content Check — TO BE DEVELOPED
+Imprint TMG / DDG Content Check - TO BE DEVELOPED
 
 Background
 ----------

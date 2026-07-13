@@ -1,5 +1,5 @@
 """
-Website Scanning Tool — by Tuemedia IT
+Website Scanning Tool - by Tuemedia IT
 Entry point / main orchestrator.
 """
 
@@ -72,7 +72,7 @@ def main() -> None:
     parser.add_argument(
         "--sitemap",
         metavar="URL",
-        help="Sitemap URL — skips auto-detection and the sitemap prompt",
+        help="Sitemap URL - skips auto-detection and the sitemap prompt",
     )
     parser.add_argument(
         "--scans",
@@ -83,7 +83,7 @@ def main() -> None:
         "--imprint-url",
         metavar="URL",
         dest="imprint_url",
-        help="Imprint page URL — skips auto-detection and the imprint prompt",
+        help="Imprint page URL - skips auto-detection and the imprint prompt",
     )
     parser.add_argument(
         "--exclude",

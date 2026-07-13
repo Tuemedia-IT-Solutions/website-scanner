@@ -4,7 +4,7 @@ scanner/scans/imprint.py
 Imprint Validation Scan
 
 Detects the imprint page and checks it for the fields required by German law
-(§ 5 DDG — Digitale-Dienste-Gesetz, formerly TMG).
+(§ 5 DDG - Digitale-Dienste-Gesetz, formerly TMG).
 
 Required fields (§ 5 DDG):
   - Name / company name
@@ -95,7 +95,7 @@ _LAW_PATTERNS: list[tuple[str, re.Pattern, str, str]] = [
         "tmg",
         re.compile(r"\bTMG\b|\bTelemediengesetz\b", re.IGNORECASE),
         "warning",
-        "Reference to TMG found. TMG was replaced by DDG in 2024 — please update.",
+        "Reference to TMG found. TMG was replaced by DDG in 2024 - please update.",
     ),
     (
         "ttdsg",
@@ -108,7 +108,7 @@ _LAW_PATTERNS: list[tuple[str, re.Pattern, str, str]] = [
         "ddg",
         re.compile(r"\bDDG\b|\bDigitale-?Dienste-?Gesetz\b", re.IGNORECASE),
         "ok",
-        "DDG reference found — up to date.",
+        "DDG reference found - up to date.",
     ),
 ]
 
@@ -158,7 +158,7 @@ def run(pages: list[str], console: Console, config: dict) -> ImprintResult:
     """
     Validate the imprint page.
 
-    *pages* is ignored — the imprint URL comes from ``config["imprint_url"]``.
+    *pages* is ignored - the imprint URL comes from ``config["imprint_url"]``.
     """
     imprint_url: str = config["imprint_url"]
 
@@ -195,7 +195,7 @@ def _validate(imprint_url: str, cache=None) -> ImprintResult:
 
     soup = BeautifulSoup(resp.content, "lxml")
 
-    # Strip navigation, header, footer noise — focus on the main content area.
+    # Strip navigation, header, footer noise - focus on the main content area.
     for tag in soup(["nav", "header", "footer", "script", "style"]):
         tag.decompose()
 

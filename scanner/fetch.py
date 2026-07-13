@@ -18,7 +18,7 @@ class PageCache:
     Caches HTTP responses by URL for the duration of a single scan run.
 
     The cache stores any HTTP response (any status code).  Network-level
-    exceptions are *not* cached — they propagate to the caller so that
+    exceptions are *not* cached - they propagate to the caller so that
     existing ``except requests.RequestException`` blocks still work unchanged.
 
     Usage::

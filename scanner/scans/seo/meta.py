@@ -1,7 +1,7 @@
 """
 scanner/scans/seo/meta.py
 
-SEO check: meta tags — title, description, canonical URL.
+SEO check: meta tags - title, description, canonical URL.
 
 Checks:
   - Missing / empty <title>                              → error

@@ -1,7 +1,7 @@
 """
 scanner/scans/performance.py
 
-Performance scan — measures HTTP response time and content size per page.
+Performance scan - measures HTTP response time and content size per page.
 
 Uses the shared PageCache so no extra network requests are made when other
 scans have already fetched the page in the same run.  The timings come
@@ -108,12 +108,12 @@ def _render(results: list[PagePerformance], console: Console) -> None:
         time_str = (
             f"[{colour}]{r.response_time_ms:.0f}[/{colour}]"
             if r.response_time_ms is not None
-            else "[red]—[/red]"
+            else "[red]-[/red]"
         )
         size_str = (
             f"{r.content_size_bytes / 1024:.1f}"
             if r.content_size_bytes is not None
-            else "—"
+            else "-"
         )
         table.add_row(r.url, time_str, size_str, f"[{colour}]{label}[/{colour}]")
 

@@ -106,7 +106,7 @@ def test_density_ok_with_enough_content():
 
 
 def test_density_not_triggered_below_4_headings():
-    # Only 3 headings with very little content — should NOT trigger density check
+    # Only 3 headings with very little content - should NOT trigger density check
     html = f"<body>{_headings([1, 2, 3])}<p>{_words(10)}</p></body>"
     issues = check_headings(_soup(html))
     assert not any(i.check == "High heading density" for i in issues)

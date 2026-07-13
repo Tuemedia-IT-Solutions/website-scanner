@@ -10,7 +10,9 @@ from rich.console import Console
 from scanner.scans.link_check import LinkResult, _check_url, run
 
 
-def _mock_response(status: int, final_url: str | None = None, history=None) -> MagicMock:
+def _mock_response(
+    status: int, final_url: str | None = None, history=None
+) -> MagicMock:
     resp = MagicMock()
     resp.status_code = status
     resp.url = final_url or "https://example.com/"
@@ -73,14 +75,16 @@ def test_status_label_returns_string():
 
 
 def test_status_label_none_returns_dash():
-    assert LinkResult(url="u", status=None).status_label == "—"
+    assert LinkResult(url="u", status=None).status_label == "-"
 
 
 # ── _check_url ────────────────────────────────────────────────────────────────
 
 
 def test_check_url_200_ok():
-    with patch("scanner.scans.link_check.requests.get", return_value=_mock_response(200)):
+    with patch(
+        "scanner.scans.link_check.requests.get", return_value=_mock_response(200)
+    ):
         result = _check_url("https://example.com/")
     assert result.status == 200
     assert result.severity == "ok"
@@ -88,7 +92,9 @@ def test_check_url_200_ok():
 
 
 def test_check_url_404_error():
-    with patch("scanner.scans.link_check.requests.get", return_value=_mock_response(404)):
+    with patch(
+        "scanner.scans.link_check.requests.get", return_value=_mock_response(404)
+    ):
         result = _check_url("https://example.com/missing")
     assert result.status == 404
     assert result.severity == "error"
@@ -145,7 +151,9 @@ def test_check_url_generic_request_exception():
 
 def test_run_returns_one_result_per_page():
     pages = ["https://example.com/a", "https://example.com/b", "https://example.com/c"]
-    with patch("scanner.scans.link_check.requests.get", return_value=_mock_response(200)):
+    with patch(
+        "scanner.scans.link_check.requests.get", return_value=_mock_response(200)
+    ):
         results = run(pages, _null_console(), {})
     assert len(results) == 3
     assert [r.url for r in results] == pages

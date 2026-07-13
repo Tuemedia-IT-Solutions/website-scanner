@@ -1,7 +1,7 @@
 """
 scanner/scans/link_check.py
 
-Sitemap Link Check — verifies that every URL in the selected page list
+Sitemap Link Check - verifies that every URL in the selected page list
 is reachable and returns an expected HTTP status code.
 
 For each URL:
@@ -57,7 +57,7 @@ class LinkResult:
     @property
     def status_label(self) -> str:
         if self.status is None:
-            return "—"
+            return "-"
         return str(self.status)
 
 

@@ -41,7 +41,7 @@ def test_200_words_is_ok():
 
 
 def test_script_content_excluded():
-    # 5 real words + lots of script "words" — should still be flagged as thin
+    # 5 real words + lots of script "words" - should still be flagged as thin
     html = f"<body><p>{_words(5)}</p><script>{_words(200)}</script></body>"
     issues = check_content(_soup(html))
     assert any(i.check == "Very thin content" for i in issues)
