@@ -42,6 +42,12 @@ AVAILABLE_SCANS: list[tuple[str, str, str, bool]] = [
         False,
     ),
     (
+        "os_platform",
+        "EU OS-Plattform Check",
+        "Detect outdated links/notices to the EU OS-Plattform (shut down 20 July 2025)",
+        True,
+    ),
+    (
         "seo",
         "SEO Scan",
         "Check image ALTs, heading structure, meta descriptions, and more",

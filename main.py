@@ -185,7 +185,7 @@ def main() -> None:
     # ── 5a. Per-scan setup prompts ────────────────────────────────────────────
     scan_config: dict = {}
 
-    if "imprint_check" in selected_scans:
+    if "imprint_check" in selected_scans or "os_platform" in selected_scans:
         if args.imprint_url:
             scan_config["imprint_url"] = args.imprint_url
             console.print(f"[dim]Imprint URL:[/dim] [cyan]{args.imprint_url}[/cyan]")
