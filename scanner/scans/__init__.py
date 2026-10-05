@@ -1,17 +1,22 @@
 """
 scanner/scans/__init__.py
 
-Scan orchestrator — dispatches selected scans to their modules
+Scan orchestrator - dispatches selected scans to their modules
 and renders a final results summary.
 """
 
 from __future__ import annotations
 
+import dataclasses
+from typing import Any
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from . import accessibility, imprint, legal, link_check, os_platform, seo, tmg_check
+from scanner.fetch import PageCache
+
+from . import accessibility, imprint, legal, link_check, performance, os_platform, seo, tmg_check
 
 # Maps scan keys (from selector.py) to their module.
 # Each module must expose: run(pages, console, config) -> Any
@@ -22,8 +27,18 @@ _REGISTRY = {
     "tmg_check": tmg_check,
     "os_platform": os_platform,
     "seo": seo,
+    "performance": performance,
     "accessibility": accessibility,
 }
+
+
+def _to_json_serializable(obj: Any) -> Any:
+    """Recursively convert dataclasses and lists to JSON-serializable structures."""
+    if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+        return {k: _to_json_serializable(v) for k, v in dataclasses.asdict(obj).items()}
+    if isinstance(obj, list):
+        return [_to_json_serializable(item) for item in obj]
+    return obj
 
 
 def run_scans(
@@ -31,15 +46,20 @@ def run_scans(
     selected_scan_keys: list[str],
     console: Console,
     scan_config: dict | None = None,
-) -> None:
+) -> dict[str, Any]:
     """
     Run each selected scan against all selected pages.
+
+    Returns a dict mapping each scan key to its structured result,
+    suitable for JSON serialisation.
 
     *scan_config* is an optional dict of per-scan settings, e.g.::
 
         {"imprint_url": "https://example.com/impressum"}
     """
     scan_config = scan_config or {}
+    scan_config.setdefault("page_cache", PageCache())
+    results: dict[str, Any] = {}
 
     console.print(
         Panel.fit(
@@ -55,9 +75,12 @@ def run_scans(
             console.print(f"[red]Unknown scan key:[/red] {key}")
             continue
         try:
-            module.run(pages, console, scan_config)  # type: ignore[attr-defined]
+            raw = module.run(pages, console, scan_config)  # type: ignore[attr-defined]
+            results[key] = _to_json_serializable(raw)
         except NotImplementedError:
             _print_not_implemented(key, console)
+
+    return results
 
 
 def _print_not_implemented(key: str, console: Console) -> None:
@@ -65,6 +88,6 @@ def _print_not_implemented(key: str, console: Console) -> None:
     table.add_column(style="yellow")
     table.add_column()
     table.add_row("Scan:", key)
-    table.add_row("Status:", "[yellow]Not yet implemented — coming soon[/yellow]")
+    table.add_row("Status:", "[yellow]Not yet implemented - coming soon[/yellow]")
     console.print(table)
     console.print()

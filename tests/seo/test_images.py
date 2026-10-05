@@ -47,12 +47,12 @@ def test_empty_alt_without_role_is_warning():
 
 def test_empty_alt_with_role_presentation_no_issue():
     issues = check_images(_soup('<img src="x.jpg" alt="" role="presentation">'))
-    assert issues == []
+    assert not any(i.severity in ("error", "warning") for i in issues)
 
 
 def test_empty_alt_with_role_none_no_issue():
     issues = check_images(_soup('<img src="x.jpg" alt="" role="none">'))
-    assert issues == []
+    assert not any(i.severity in ("error", "warning") for i in issues)
 
 
 def test_empty_alt_whitespace_only_is_warning():
@@ -102,8 +102,10 @@ def test_generic_alt_with_trailing_digit_is_warning():
 
 
 def test_valid_descriptive_alt_no_issue():
-    issues = check_images(_soup('<img src="x.jpg" alt="A photo of the Berlin skyline">'))
-    assert issues == []
+    issues = check_images(
+        _soup('<img src="x.jpg" alt="A photo of the Berlin skyline">')
+    )
+    assert not any(i.severity in ("error", "warning") for i in issues)
 
 
 # ── Snippet helper ────────────────────────────────────────────────────────────

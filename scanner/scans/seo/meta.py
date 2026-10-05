@@ -1,7 +1,7 @@
 """
 scanner/scans/seo/meta.py
 
-SEO check: meta tags — title, description, canonical URL.
+SEO check: meta tags - title, description, canonical URL.
 
 Checks:
   - Missing / empty <title>                              → error
@@ -43,31 +43,37 @@ def _check_title(soup: BeautifulSoup) -> list[SeoIssue]:
                 check="Missing title",
                 severity="error",
                 detail="Page has no <title> tag. Required for SEO and browser tab labelling.",
+                weight=1.5,
             )
         ]
 
     title = tag.get_text(strip=True)
     length = len(title)
-    issues: list[SeoIssue] = []
 
     if length < _TITLE_MIN:
-        issues.append(
+        return [
             SeoIssue(
                 check="Title too short",
                 severity="warning",
                 detail=f'Title is {length} chars (min {_TITLE_MIN}): "{title}"',
             )
-        )
+        ]
     elif length > _TITLE_MAX:
-        issues.append(
+        return [
             SeoIssue(
                 check="Title too long",
                 severity="warning",
                 detail=f'Title is {length} chars (max {_TITLE_MAX}): "{title[:60]}…"',
             )
-        )
-
-    return issues
+        ]
+    else:
+        return [
+            SeoIssue(
+                check="Title",
+                severity="ok",
+                detail=f"{length}-char title present and within recommended length.",
+            )
+        ]
 
 
 # ── Meta description ──────────────────────────────────────────────────────────
@@ -87,18 +93,17 @@ def _check_description(soup: BeautifulSoup) -> list[SeoIssue]:
 
     desc = tag["content"].strip()
     length = len(desc)
-    issues: list[SeoIssue] = []
 
     if length < _DESC_MIN:
-        issues.append(
+        return [
             SeoIssue(
                 check="Meta description too short",
                 severity="warning",
                 detail=f'Description is {length} chars (min {_DESC_MIN}): "{desc}"',
             )
-        )
+        ]
     elif length > _DESC_MAX:
-        issues.append(
+        return [
             SeoIssue(
                 check="Meta description too long",
                 severity="warning",
@@ -107,9 +112,15 @@ def _check_description(soup: BeautifulSoup) -> list[SeoIssue]:
                     "Google truncates long descriptions in search results."
                 ),
             )
-        )
-
-    return issues
+        ]
+    else:
+        return [
+            SeoIssue(
+                check="Meta description",
+                severity="ok",
+                detail=f"{length}-char description present and within recommended length.",
+            )
+        ]
 
 
 # ── Canonical ─────────────────────────────────────────────────────────────────

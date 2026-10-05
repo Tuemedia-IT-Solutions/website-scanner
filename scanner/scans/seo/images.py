@@ -26,8 +26,9 @@ _GENERIC_ALTS = re.compile(
 
 def check_images(soup: BeautifulSoup) -> list[SeoIssue]:
     issues: list[SeoIssue] = []
+    imgs = soup.find_all("img")
 
-    for img in soup.find_all("img"):
+    for img in imgs:
         snippet = _img_snippet(img)
 
         if not img.has_attr("alt"):
@@ -64,6 +65,15 @@ def check_images(soup: BeautifulSoup) -> list[SeoIssue]:
                     element=snippet,
                 )
             )
+
+    if imgs and not issues:
+        issues.append(
+            SeoIssue(
+                check="Image ALT texts",
+                severity="ok",
+                detail=f"All {len(imgs)} image(s) have descriptive alt attributes.",
+            )
+        )
 
     return issues
 

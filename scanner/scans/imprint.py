@@ -4,7 +4,7 @@ scanner/scans/imprint.py
 Imprint Validation Scan
 
 Detects the imprint page and checks it for the fields required by German law
-(§ 5 DDG — Digitale-Dienste-Gesetz, formerly TMG).
+(§ 5 DDG - Digitale-Dienste-Gesetz, formerly TMG).
 
 Required fields (§ 5 DDG):
   - Name / company name
@@ -54,7 +54,7 @@ _FIELD_CHECKS: list[tuple[str, str, re.Pattern, str, str]] = [
         "Street address",
         re.compile(
             r"[A-ZÄÖÜ][a-zäöüß]+"
-            r"(?:straße|strasse|gasse|weg|allee|ring|platz|damm|berg|park|chaussee|steig|pfad)"
+            r"(?:straße|strasse|gasse|weg|allee|ring|platz|damm|berg|park|chaussee|steig|pfad|hof)"
             r"\s+\d+",
             re.IGNORECASE,
         ),
@@ -95,7 +95,7 @@ _LAW_PATTERNS: list[tuple[str, re.Pattern, str, str]] = [
         "tmg",
         re.compile(r"\bTMG\b|\bTelemediengesetz\b", re.IGNORECASE),
         "warning",
-        "Reference to TMG found. TMG was replaced by DDG in 2024 — please update.",
+        "Reference to TMG found. TMG was replaced by DDG in 2024 - please update.",
     ),
     (
         "ttdsg",
@@ -108,7 +108,7 @@ _LAW_PATTERNS: list[tuple[str, re.Pattern, str, str]] = [
         "ddg",
         re.compile(r"\bDDG\b|\bDigitale-?Dienste-?Gesetz\b", re.IGNORECASE),
         "ok",
-        "DDG reference found — up to date.",
+        "DDG reference found - up to date.",
     ),
 ]
 
@@ -158,7 +158,7 @@ def run(pages: list[str], console: Console, config: dict) -> ImprintResult:
     """
     Validate the imprint page.
 
-    *pages* is ignored — the imprint URL comes from ``config["imprint_url"]``.
+    *pages* is ignored - the imprint URL comes from ``config["imprint_url"]``.
     """
     imprint_url: str = config["imprint_url"]
 
@@ -170,7 +170,7 @@ def run(pages: list[str], console: Console, config: dict) -> ImprintResult:
     )
 
     with console.status("[dim]Fetching imprint page…[/dim]"):
-        result = _validate(imprint_url)
+        result = _validate(imprint_url, config.get("page_cache"))
 
     _render(result, console)
     return result
@@ -179,11 +179,15 @@ def run(pages: list[str], console: Console, config: dict) -> ImprintResult:
 # ── Internals ─────────────────────────────────────────────────────────────────
 
 
-def _validate(imprint_url: str) -> ImprintResult:
+def _validate(imprint_url: str, cache=None) -> ImprintResult:
     result = ImprintResult(imprint_url=imprint_url)
 
     try:
-        resp = requests.get(imprint_url, timeout=_TIMEOUT, headers=_HEADERS)
+        resp = (
+            cache.get(imprint_url)
+            if cache is not None
+            else requests.get(imprint_url, timeout=_TIMEOUT, headers=_HEADERS)
+        )
         resp.raise_for_status()
     except requests.RequestException as exc:
         result.fetch_error = str(exc)
@@ -191,7 +195,7 @@ def _validate(imprint_url: str) -> ImprintResult:
 
     soup = BeautifulSoup(resp.content, "lxml")
 
-    # Strip navigation, header, footer noise — focus on the main content area.
+    # Strip navigation, header, footer noise - focus on the main content area.
     for tag in soup(["nav", "header", "footer", "script", "style"]):
         tag.decompose()
 
@@ -202,7 +206,9 @@ def _validate(imprint_url: str) -> ImprintResult:
         m = pattern.search(text)
         if m:
             matched = _snippet(text, m, context_right=_FIELD_CONTEXT_RIGHT.get(key, 0))
-            result.issues.append(ImprintIssue("ok", label, f"{label} detected.", matched=matched))
+            result.issues.append(
+                ImprintIssue("ok", label, f"{label} detected.", matched=matched)
+            )
         else:
             result.issues.append(ImprintIssue(severity, label, hint))
 

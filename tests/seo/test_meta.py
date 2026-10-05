@@ -46,13 +46,19 @@ def test_short_title_is_warning():
 def test_title_at_min_boundary_no_issue():
     title = "A" * _TITLE_MIN  # exactly 10 chars
     issues = check_meta(_soup(f"<html><head><title>{title}</title></head></html>"))
-    assert not any(i.check.startswith("Title") for i in issues)
+    assert not any(
+        i.check.startswith("Title") and i.severity in ("error", "warning")
+        for i in issues
+    )
 
 
 def test_title_at_max_boundary_no_issue():
     title = "A" * _TITLE_MAX  # exactly 60 chars
     issues = check_meta(_soup(f"<html><head><title>{title}</title></head></html>"))
-    assert not any(i.check.startswith("Title") for i in issues)
+    assert not any(
+        i.check.startswith("Title") and i.severity in ("error", "warning")
+        for i in issues
+    )
 
 
 def test_long_title_is_warning():
@@ -63,16 +69,21 @@ def test_long_title_is_warning():
 
 
 def test_valid_title_no_issue():
-    title = "Awesome Website — Products & Services"
+    title = "Awesome Website - Products & Services"
     issues = check_meta(_soup(f"<html><head><title>{title}</title></head></html>"))
-    assert not any(i.check.startswith("Title") for i in issues)
+    assert not any(
+        i.check.startswith("Title") and i.severity in ("error", "warning")
+        for i in issues
+    )
 
 
 # ── Meta description ──────────────────────────────────────────────────────────
 
 
 def test_missing_description_is_warning():
-    issues = check_meta(_soup("<html><head><title>Valid Title Here!</title></head></html>"))
+    issues = check_meta(
+        _soup("<html><head><title>Valid Title Here!</title></head></html>")
+    )
     by = _by_check(issues)
     assert by["Missing meta description"] == "warning"
 
@@ -106,13 +117,19 @@ def test_short_description_is_warning():
 def test_description_at_min_boundary_no_issue():
     desc = "A" * _DESC_MIN  # exactly 50 chars
     issues = check_meta(_soup(_html_with_desc(_GOOD_TITLE, desc)))
-    assert not any(i.check.startswith("Meta description") for i in issues)
+    assert not any(
+        i.check.startswith("Meta description") and i.severity in ("error", "warning")
+        for i in issues
+    )
 
 
 def test_description_at_max_boundary_no_issue():
     desc = "A" * _DESC_MAX  # exactly 160 chars
     issues = check_meta(_soup(_html_with_desc(_GOOD_TITLE, desc)))
-    assert not any(i.check.startswith("Meta description") for i in issues)
+    assert not any(
+        i.check.startswith("Meta description") and i.severity in ("error", "warning")
+        for i in issues
+    )
 
 
 def test_long_description_is_warning():
@@ -125,7 +142,10 @@ def test_long_description_is_warning():
 def test_valid_description_no_issue():
     desc = "This is a great description that is within the recommended length limits for search engine snippets."
     issues = check_meta(_soup(_html_with_desc(_GOOD_TITLE, desc)))
-    assert not any(i.check.startswith("Meta description") for i in issues)
+    assert not any(
+        i.check.startswith("Meta description") and i.severity in ("error", "warning")
+        for i in issues
+    )
 
 
 # ── Canonical ─────────────────────────────────────────────────────────────────
@@ -158,5 +178,5 @@ def test_all_clean_returns_only_canonical_info():
     desc = "A" * _DESC_MIN
     html = _html_with_desc(title, desc)
     issues = check_meta(_soup(html))
-    checks = {i.check for i in issues}
-    assert checks == {"Missing canonical URL"}
+    non_ok = {i.check for i in issues if i.severity != "ok"}
+    assert non_ok == {"Missing canonical URL"}

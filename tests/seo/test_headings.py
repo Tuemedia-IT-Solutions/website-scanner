@@ -32,7 +32,7 @@ def test_only_h2_reports_missing_h1():
 
 def test_single_h1_no_issues():
     issues = check_headings(_soup("<h1>Page Title</h1>"))
-    assert issues == []
+    assert not any(i.severity in ("error", "warning") for i in issues)
 
 
 # ── Multiple H1 ───────────────────────────────────────────────────────────────
@@ -76,6 +76,47 @@ def test_skip_detail_mentions_levels():
     skip = next(i for i in issues if i.check == "Skipped heading level")
     assert "H1" in skip.detail
     assert "H4" in skip.detail
+
+
+# ── Heading density ───────────────────────────────────────────────────────────
+
+
+def _words(n: int) -> str:
+    return " ".join(["word"] * n)
+
+
+def _headings(levels: list[int]) -> str:
+    return "".join(f"<h{l}>Heading</h{l}>" for l in levels)
+
+
+def test_high_density_warns():
+    # 4 headings, 40 words → 10 words/heading < 30 threshold
+    html = f"<body>{_headings([1, 2, 2, 3])}<p>{_words(40)}</p></body>"
+    issues = check_headings(_soup(html))
+    assert any(i.check == "High heading density" for i in issues)
+    issue = next(i for i in issues if i.check == "High heading density")
+    assert issue.severity == "warning"
+
+
+def test_density_ok_with_enough_content():
+    # 4 headings, 160 words → 40 words/heading ≥ 30 → fine
+    html = f"<body>{_headings([1, 2, 2, 3])}<p>{_words(160)}</p></body>"
+    issues = check_headings(_soup(html))
+    assert not any(i.check == "High heading density" for i in issues)
+
+
+def test_density_not_triggered_below_4_headings():
+    # Only 3 headings with very little content - should NOT trigger density check
+    html = f"<body>{_headings([1, 2, 3])}<p>{_words(10)}</p></body>"
+    issues = check_headings(_soup(html))
+    assert not any(i.check == "High heading density" for i in issues)
+
+
+def test_density_detail_mentions_counts():
+    html = f"<body>{_headings([1, 2, 2, 3])}<p>{_words(40)}</p></body>"
+    issues = check_headings(_soup(html))
+    detail = next(i.detail for i in issues if i.check == "High heading density")
+    assert "4" in detail  # heading count
 
 
 def test_h2_to_h4_skip_is_warning():
