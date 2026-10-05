@@ -9,7 +9,7 @@ by patching requests.get so we can feed arbitrary HTML page content.
 Coverage:
   - All required fields present → all ok
   - Each individual required field missing → correct severity + field name
-  - Law references: DDG (ok), TMG (warning), TTDSG (info), none (info)
+  - Law references: DDG (ok), TMG (error), TTDSG (info), none (info)
   - Company-type check: GmbH without Handelsregister → error
   - Company-type check: GmbH with Handelsregister → no error
   - HTTP fetch failure → fetch_error set, no issues
@@ -259,10 +259,10 @@ class TestLawReferences:
         result = self._validate_html(_VALID_IMPRINT)  # already contains DDG
         assert _issues_by_field(result).get("Law reference: DDG") == "ok"
 
-    def test_tmg_detected_as_warning(self):
+    def test_tmg_detected_as_error(self):
         html = _VALID_IMPRINT.replace("§ 5 DDG", "§ 5 TMG")
         result = self._validate_html(html)
-        assert _issues_by_field(result).get("Law reference: TMG") == "warning"
+        assert _issues_by_field(result).get("Law reference: TMG") == "error"
 
     def test_ttdsg_detected_as_info(self):
         html = _VALID_IMPRINT + "<p>Datenschutz gemäß TTDSG</p>"

@@ -50,6 +50,10 @@ class OsPlatformResult:
 def run(pages: list[str], console: Console, config: dict) -> list[OsPlatformResult]:
     """Scan each page for outdated references to the EU OS-Plattform."""
     results: list[OsPlatformResult] = []
+    # The imprint is often not listed in the sitemap.
+    imprint_url = config.get("imprint_url")
+    if imprint_url and imprint_url not in pages:
+        pages = [*pages, imprint_url]
     for url in pages:
         with console.status(f"[dim]Checking OS-Plattform references: {url}…[/dim]"):
             results.append(_check_page(url))
@@ -95,13 +99,13 @@ def _render(results: list[OsPlatformResult], console: Console) -> None:
 
     if flagged:
         table = Table(
-            title="Outdated EU OS-Plattform references",
+            title="[bold red]✗ Outdated EU OS-Plattform references[/bold red]",
             box=box.SIMPLE_HEAD,
             show_lines=False,
         )
         table.add_column("Page", overflow="fold")
-        table.add_column("Link", overflow="fold")
-        table.add_column("Text excerpt", overflow="fold")
+        table.add_column("Link", style="red", overflow="fold")
+        table.add_column("Text excerpt", style="red", overflow="fold")
         for r in flagged:
             table.add_row(
                 r.url,
@@ -110,9 +114,9 @@ def _render(results: list[OsPlatformResult], console: Console) -> None:
             )
         console.print(table)
         console.print(
-            "[yellow]The OS-Plattform was shut down on 20 July 2025. "
+            "[bold red]The OS-Plattform was shut down on 20 July 2025. "
             "Remove these links/notices (also from AGB and e-mail signatures) "
-            "to avoid Abmahnung risk.[/yellow]\n"
+            "to avoid Abmahnung risk.[/bold red]\n"
         )
     else:
         console.print("[green]✓[/green] No outdated OS-Plattform references found.\n")

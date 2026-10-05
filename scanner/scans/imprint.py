@@ -94,7 +94,7 @@ _LAW_PATTERNS: list[tuple[str, re.Pattern, str, str]] = [
     (
         "tmg",
         re.compile(r"\bTMG\b|\bTelemediengesetz\b", re.IGNORECASE),
-        "warning",
+        "error",
         "Reference to TMG found. TMG was replaced by DDG in 2024 - please update.",
     ),
     (
