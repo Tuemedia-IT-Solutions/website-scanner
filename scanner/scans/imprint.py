@@ -125,6 +125,17 @@ _COMPANY_CHECKS: list[tuple[re.Pattern, re.Pattern, str, str]] = [
 ]
 
 
+_ODR_HREF = re.compile(r"ec\.europa\.eu/consumers/odr", re.IGNORECASE)
+_ODR_TEXT = re.compile(
+    r"ec\.europa\.eu/consumers/odr|Online-?Streitbeilegung|OS-Plattform",
+    re.IGNORECASE,
+)
+_VSBG_TEXT = re.compile(
+    r"Verbraucherschlichtung|Verbraucherstreitbeilegung|Streitbeilegung|"
+    r"Streitschlichtung|Schlichtungsstelle|VSBG",
+    re.IGNORECASE,
+)
+
 # How many extra characters to grab to the right of the match, per field.
 # All other fields show only match.group(0).
 _FIELD_CONTEXT_RIGHT: dict[str, int] = {
@@ -195,6 +206,16 @@ def _validate(imprint_url: str, cache=None) -> ImprintResult:
 
     soup = BeautifulSoup(resp.content, "lxml")
 
+    # Checked before stripping, since the link may sit in a footer/nav.
+    odr_href = next(
+        (
+            href
+            for a in soup.find_all("a", href=True)
+            if _ODR_HREF.search(href := str(a["href"]).strip())
+        ),
+        None,
+    )
+
     # Strip navigation, header, footer noise - focus on the main content area.
     for tag in soup(["nav", "header", "footer", "script", "style"]):
         tag.decompose()
@@ -233,6 +254,40 @@ def _validate(imprint_url: str, cache=None) -> ImprintResult:
                 "info",
                 "Law reference",
                 "No DDG/TMG/TTDSG reference found. Consider adding a reference to § 5 DDG.",
+            )
+        )
+
+    # ── Consumer dispute resolution (EU ODR / VSBG) ───────────────────────────
+    odr_match = _ODR_TEXT.search(text)
+    if odr_href or odr_match:
+        result.issues.append(
+            ImprintIssue(
+                "warning",
+                "EU dispute resolution (ODR)",
+                "Reference to the EU ODR platform found. The platform was shut down "
+                "on 20 July 2025 (Regulation (EU) 2024/3228); the link obligation no "
+                "longer applies - remove the outdated link/text.",
+                matched=odr_href or (odr_match.group(0) if odr_match else None),
+            )
+        )
+    m = _VSBG_TEXT.search(text)
+    if m:
+        result.issues.append(
+            ImprintIssue(
+                "ok",
+                "Consumer arbitration (VSBG)",
+                "Statement on consumer dispute resolution detected.",
+                matched=_snippet(text, m, context_right=60),
+            )
+        )
+    else:
+        result.issues.append(
+            ImprintIssue(
+                "info",
+                "Consumer arbitration (VSBG)",
+                "No statement on participation in consumer dispute resolution "
+                "(Verbraucherstreitbeilegung) found. Required by § 36 VSBG for "
+                "traders selling to consumers online.",
             )
         )
 
