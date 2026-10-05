@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from . import accessibility, imprint, legal, link_check, seo, tmg_check
+from . import accessibility, imprint, legal, link_check, os_platform, seo, tmg_check
 
 # Maps scan keys (from selector.py) to their module.
 # Each module must expose: run(pages, console, config) -> Any
@@ -20,6 +20,7 @@ _REGISTRY = {
     "link_check": link_check,
     "legal_links": legal,
     "tmg_check": tmg_check,
+    "os_platform": os_platform,
     "seo": seo,
     "accessibility": accessibility,
 }
