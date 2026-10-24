@@ -14,8 +14,10 @@ Required fields (§ 5 DDG):
   - For GmbH/AG/UG: Handelsregisternummer + Registergericht
   - For regulated professions: supervisory authority
 
-Additional check:
+Additional checks:
   - Legal reference should be DDG (current), not TMG (outdated since 2024).
+  - Medienstaatsvertrag (§ 18 MStV): reference should be MStV, not RStV; for
+    journalistic-editorial content a responsible person must be named (Abs. 2).
 """
 
 from __future__ import annotations
@@ -124,6 +126,15 @@ _COMPANY_CHECKS: list[tuple[re.Pattern, re.Pattern, str, str]] = [
     ),
 ]
 
+
+_MSTV_REF = re.compile(r"\bMStV\b|\bMedienstaatsvertrag\b", re.IGNORECASE)
+_RSTV_REF = re.compile(r"\bRStV\b|\bRundfunkstaatsvertrag\b", re.IGNORECASE)
+_MSTV_RESPONSIBLE = re.compile(
+    r"Verantwortlich\w*\s+(?:i\.\s?S\.\s?d\.|im\s+Sinne|gemäß|nach|für)[^.]{0,80}"
+    r"(?:§\s*18\s*(?:Abs\.?\s*2)?\s*MStV|§\s*55\s*(?:Abs\.?\s*2)?\s*RStV|"
+    r"Medienstaatsvertrag|Rundfunkstaatsvertrag|Inhalt)",
+    re.IGNORECASE,
+)
 
 _ODR_HREF = re.compile(r"ec\.europa\.eu/consumers/odr", re.IGNORECASE)
 _ODR_TEXT = re.compile(
@@ -254,6 +265,41 @@ def _validate(imprint_url: str, cache=None) -> ImprintResult:
                 "info",
                 "Law reference",
                 "No DDG/TMG/TTDSG reference found. Consider adding a reference to § 5 DDG.",
+            )
+        )
+
+    # ── Medienstaatsvertrag (§ 18 MStV) ───────────────────────────────────────
+    m = _RSTV_REF.search(text)
+    if m:
+        result.issues.append(
+            ImprintIssue(
+                "error",
+                "Law reference: RStV",
+                "Reference to RStV found. The Rundfunkstaatsvertrag was replaced by "
+                "the Medienstaatsvertrag (§ 18 MStV) in 2020 - please update.",
+                matched=m.group(0).strip(),
+            )
+        )
+    m = _MSTV_RESPONSIBLE.search(text)
+    if m:
+        result.issues.append(
+            ImprintIssue(
+                "ok",
+                "Responsible person (§ 18 Abs. 2 MStV)",
+                "Responsible person for editorial content detected.",
+                matched=_snippet(text, m, context_right=60),
+            )
+        )
+    else:
+        m = _MSTV_REF.search(text)
+        result.issues.append(
+            ImprintIssue(
+                "info",
+                "Responsible person (§ 18 Abs. 2 MStV)",
+                "No responsible person (name and address) for journalistic-editorial "
+                "content found. Required by § 18 Abs. 2 MStV if the site publishes "
+                "such content (e.g. blog/news); otherwise ignore.",
+                matched=m.group(0).strip() if m else None,
             )
         )
 

@@ -372,3 +372,25 @@ class TestMatchedValues:
         ):
             result = _validate(_BASE)
         assert _matched_by_field(result)["E-mail address"] is None
+
+
+def _mstv_issues(extra: str):
+    html = _VALID_IMPRINT.replace("</body>", f"<p>{extra}</p></body>")
+    resp = MagicMock(content=html.encode())
+    with patch("scanner.scans.imprint.requests.get", return_value=resp):
+        return {i.field: i for i in _validate(_BASE).issues}
+
+
+def test_mstv_responsible_person_ok():
+    issues = _mstv_issues("Verantwortlich gemäß § 18 Abs. 2 MStV: Max Mustermann")
+    assert issues["Responsible person (§ 18 Abs. 2 MStV)"].severity == "ok"
+
+
+def test_mstv_responsible_person_missing_is_info():
+    issues = _mstv_issues("")
+    assert issues["Responsible person (§ 18 Abs. 2 MStV)"].severity == "info"
+
+
+def test_rstv_reference_warns():
+    issues = _mstv_issues("Verantwortlich nach § 55 Abs. 2 RStV: Max Mustermann")
+    assert issues["Law reference: RStV"].severity == "error"
